@@ -1,3 +1,4 @@
+// src/components/plants/plant-form.tsx
 'use client';
 
 import { FC } from 'react';
@@ -40,9 +41,10 @@ type PlantFormValues = z.infer<typeof plantFormSchema>;
 interface PlantFormProps {
   initialData?: PlantFormValues;
   plantId?: string;
+  onSuccess?: () => void;
 }
 
-const PlantForm: FC<PlantFormProps> = ({ initialData, plantId }) => {
+const PlantForm: FC<PlantFormProps> = ({ initialData, plantId, onSuccess }) => {
   const router = useRouter();
   const isEditing = !!plantId;
 
@@ -79,8 +81,12 @@ const PlantForm: FC<PlantFormProps> = ({ initialData, plantId }) => {
         throw new Error('Failed to save plant');
       }
 
-      router.push('/plants');
-      router.refresh();
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        router.push('/plants');
+        router.refresh();
+      }
     } catch (error) {
       console.error('Error saving plant:', error);
       // Here you might want to display an error message to the user
@@ -216,6 +222,6 @@ const PlantForm: FC<PlantFormProps> = ({ initialData, plantId }) => {
       </form>
     </Form>
   );
-};
+}
 
 export default PlantForm;

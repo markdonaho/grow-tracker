@@ -54,7 +54,7 @@ export default function PlantsPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Plants</h1>
         <Button asChild>
-          <Link href="/plants/new">
+          <Link href="/plants/new">  {/* This is the correct path */}
             <Plus className="mr-2 h-4 w-4" />
             Add Plant
           </Link>
