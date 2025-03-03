@@ -2,7 +2,7 @@
 import { FC } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { 
-  Plant, 
+  Sprout, 
   Package, 
   Calendar, 
   Activity,
@@ -22,7 +22,7 @@ const StatsCard: FC<StatsCardProps> = ({ title, value, description, icon }) => {
   const renderIcon = () => {
     switch (icon) {
       case 'plant':
-        return <Plant className="h-5 w-5" />;
+        return <Sprout className="h-5 w-5" />;
       case 'package':
         return <Package className="h-5 w-5" />;
       case 'calendar':

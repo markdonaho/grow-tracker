@@ -1,6 +1,6 @@
 // src/components/dashboard/recent-actions.tsx
 import { FC } from 'react';
-import { Droplets, Scissors, Seedling, Zap } from 'lucide-react';
+import { Droplets, Scissors, Sprout, Zap } from 'lucide-react';
 
 interface ActionItem {
   id: string;
@@ -25,7 +25,7 @@ const RecentActions: FC = () => {
       case 'Pruning':
         return <Scissors className="h-4 w-4" />;
       case 'Feeding':
-        return <Seedling className="h-4 w-4" />;
+        return <Sprout className="h-4 w-4" />;
       case 'Training':
         return <Zap className="h-4 w-4" />;
       default:

@@ -2,15 +2,14 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
-import { useState } from 'react';
 import Header from '@/components/layouts/header';
 import SidebarNav from '@/components/layouts/sidebar-nav';
-import { Sonner } from '@/components/ui/sonner';
+import { Toaster } from '@/components/ui/sonner';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'GrowTracker - Cannabis Cultivation Management',
-  description: 'Track and manage your cannabis cultivation with ease',
+  title: 'GrowTracker - Cultivation Management',
+  description: 'Track and manage your cultivation with ease',
 };
 
 export default function RootLayout({
@@ -24,7 +23,7 @@ export default function RootLayout({
         <ClientLayout>
           {children}
         </ClientLayout>
-        <Sonner />
+        <Toaster />
       </body>
     </html>
   );

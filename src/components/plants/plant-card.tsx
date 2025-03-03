@@ -2,7 +2,7 @@
 import { FC } from 'react';
 import Link from 'next/link';
 import { formatDistance } from 'date-fns';
-import { Plant, Ruler, Calendar, Badge, MoreVertical } from 'lucide-react';
+import { Sprout, Ruler, Calendar, Badge, MoreVertical } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -20,6 +20,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
+import { SP } from 'next/dist/shared/lib/utils';
 
 interface PlantCardProps {
   plant: {
@@ -112,7 +113,7 @@ const PlantCard: FC<PlantCardProps> = ({ plant }) => {
             <span>Age: {ageInDays} days</span>
           </div>
           <div className="flex items-center text-sm">
-            <Plant className="mr-2 h-4 w-4" />
+            <Sprout className="mr-2 h-4 w-4" />
             <span>Start Date: {new Date(plant.startDate).toLocaleDateString()}</span>
           </div>
           <div className="flex items-center text-sm">

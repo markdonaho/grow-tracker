@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { 
   Home, 
-  Plant, 
+  Sprout, 
   Droplets, 
   Calendar, 
   Settings,
@@ -22,7 +22,7 @@ const SidebarNav: FC<SidebarNavProps> = ({ isOpen, onClose }) => {
   
   const navItems = [
     { href: '/dashboard', label: 'Dashboard', icon: <Home className="mr-2 h-4 w-4" /> },
-    { href: '/plants', label: 'Plants', icon: <Plant className="mr-2 h-4 w-4" /> },
+    { href: '/plants', label: 'Plants', icon: <Sprout className="mr-2 h-4 w-4" /> },
     { href: '/actions', label: 'Actions', icon: <Droplets className="mr-2 h-4 w-4" /> },
     { href: '/schedule', label: 'Schedule', icon: <Calendar className="mr-2 h-4 w-4" /> },
     { href: '/settings', label: 'Settings', icon: <Settings className="mr-2 h-4 w-4" /> },
