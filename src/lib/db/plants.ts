@@ -1,7 +1,7 @@
 // src/lib/db/plants.ts
 import { ObjectId } from 'mongodb';
 import { getCollection, COLLECTIONS } from './mongodb';
-import { Plant } from '@/types/plant';
+import { Plant, GrowthMetric } from '@/types/plant';
 
 // Get all plants with optional filtering
 export async function getPlants(filter: Partial<Plant> = {}) {
@@ -58,13 +58,13 @@ export async function deletePlant(id: string) {
 }
 
 // Add a growth metric to a plant
-export async function addGrowthMetric(plantId: string, metricData: Omit<Plant['growthMetrics'][0], 'id'>) {
+export async function addGrowthMetric(plantId: string, metricData: Omit<GrowthMetric, 'id'>) {
   const collection = getCollection(COLLECTIONS.PLANTS);
   
   await collection.updateOne(
     { _id: new ObjectId(plantId) },
     { 
-      $push: { growthMetrics: metricData },
+      $push: { growthMetrics: metricData as any },
       $set: { updatedAt: new Date() }
     }
   );
