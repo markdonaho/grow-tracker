@@ -8,6 +8,7 @@ import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import ActionForm from '@/components/forms/action-form';
 import { useEffect, useState } from 'react';
+import { use } from "react";
 
 interface EditActionPageProps {
   params: {
@@ -24,7 +25,9 @@ interface ActionData {
 }
 
 export default function EditActionPage({ params }: EditActionPageProps) {
-  const { id, actionId } = params;
+  // Unwrap the params object with React.use()
+  const resolvedParams = use(Promise.resolve(params));
+  const { id, actionId } = resolvedParams;
   const router = useRouter();
   const [action, setAction] = useState<ActionData | null>(null);
   const [loading, setLoading] = useState(true);

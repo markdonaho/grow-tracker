@@ -8,6 +8,7 @@ import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import PlantForm from '@/components/plants/plant-form';
 import { useEffect, useState } from 'react';
+import { use } from "react";
 
 interface EditPlantPageProps {
   params: {
@@ -25,7 +26,9 @@ interface PlantData {
 }
 
 export default function EditPlantPage({ params }: EditPlantPageProps) {
-  const { id } = params;
+  // Unwrap the params object with React.use()
+  const resolvedParams = use(Promise.resolve(params));
+  const { id } = resolvedParams;
   const router = useRouter();
   const [plant, setPlant] = useState<PlantData | null>(null);
   const [loading, setLoading] = useState(true);

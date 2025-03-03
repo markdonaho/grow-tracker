@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChevronLeft } from "lucide-react";
 import ImageUpload from "@/components/upload/image-upload";
+import { use } from "react";
 
 interface ImagesPageProps {
   params: {
@@ -15,7 +16,8 @@ interface ImagesPageProps {
 }
 
 export default function ImagesPage({ params }: ImagesPageProps) {
-  const { id } = params;
+  const resolvedParams = use(Promise.resolve(params));
+  const { id } = resolvedParams;
   const [images, setImages] = useState<{ id: string; url: string; date: string }[]>([]);
 
   const handleImageUpload = async (file: File) => {

@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import ActionForm from '@/components/forms/action-form';
+import { use } from "react";
 
 interface NewActionPageProps {
   params: {
@@ -15,7 +16,9 @@ interface NewActionPageProps {
 }
 
 export default function NewActionPage({ params }: NewActionPageProps) {
-  const { id } = params;
+  // Unwrap the params object with React.use()
+  const resolvedParams = use(Promise.resolve(params));
+  const { id } = resolvedParams;
   const router = useRouter();
 
   const handleActionCreated = () => {

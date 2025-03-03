@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ChevronLeft, Edit, Plus, Upload } from "lucide-react";
 import PlantMetrics from "@/components/plants/plant-metrics";
 import PlantActions from "@/components/plants/plant-actions";
+import { use } from "react"; // Import the use function from React
 
 interface PlantDetailPageProps {
   params: {
@@ -13,8 +14,10 @@ interface PlantDetailPageProps {
   };
 }
 
-export default async function PlantDetailPage({ params }: PlantDetailPageProps) {
-  const { id } = params;
+export default function PlantDetailPage({ params }: PlantDetailPageProps) {
+  // Unwrap the params object with React.use()
+  const resolvedParams = use(Promise.resolve(params));
+  const { id } = resolvedParams;
   
   // In a real application, this would fetch data from your API
   const plant = {

@@ -9,6 +9,7 @@ import Link from "next/link";
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { use } from "react";
 import {
   Form,
   FormControl,
@@ -34,7 +35,9 @@ const noteSchema = z.object({
 type NoteFormValues = z.infer<typeof noteSchema>;
 
 export default function NewNotePage({ params }: NewNotePageProps) {
-  const { id } = params;
+  // Unwrap the params object with React.use()
+  const resolvedParams = use(Promise.resolve(params));
+  const { id } = resolvedParams;
   const router = useRouter();
 
   const form = useForm<NoteFormValues>({
