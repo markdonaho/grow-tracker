@@ -1,6 +1,6 @@
 # GrowTracker
 
-GrowTracker is a containerized cannabis cultivation management system that helps growers track plants, log actions, monitor growth metrics, and manage their cultivation process from start to finish.
+GrowTracker is a containerized cultivation management system that helps growers track plants, log actions, monitor growth metrics, and manage their cultivation process from start to finish.
 
 ## Features
 
