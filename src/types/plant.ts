@@ -11,7 +11,7 @@ export interface GrowthMetric {
 }
 
 export interface Plant {
-  _id?: ObjectId;
+  _id?: ObjectId | string;
   name: string;
   strain: string;
   status: PlantStatus;

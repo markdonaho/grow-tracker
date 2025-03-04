@@ -15,8 +15,8 @@ export interface ActionDetails {
 }
 
 export interface Action {
-  _id?: ObjectId;
-  plantId: ObjectId;
+  _id?: ObjectId | string;
+  plantId: ObjectId | string;
   actionType: ActionType;
   date: Date;
   details?: ActionDetails;

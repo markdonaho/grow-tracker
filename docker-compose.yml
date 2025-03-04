@@ -1,0 +1,77 @@
+services:
+  # MongoDB Database
+  mongodb:
+    image: mongo:6.0
+    container_name: growtracker-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-password}
+      MONGO_INITDB_DATABASE: ${MONGODB_DB:-growtracker}
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb-data:/data/db
+      - ./docker/mongodb/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+    networks:
+      - growtracker-network
+
+  # MongoDB Express Web UI (optional admin tool)
+  mongo-express:
+    image: mongo-express:latest
+    container_name: growtracker-mongo-express
+    restart: unless-stopped
+    depends_on:
+      - mongodb
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_ROOT_USER:-admin}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_ROOT_PASSWORD:-password}
+      ME_CONFIG_MONGODB_SERVER: mongodb
+      ME_CONFIG_BASICAUTH_USERNAME: ${MONGO_EXPRESS_USER:-admin}
+      ME_CONFIG_BASICAUTH_PASSWORD: ${MONGO_EXPRESS_PASSWORD:-password}
+    ports:
+      - "8081:8081"
+    networks:
+      - growtracker-network
+
+  # MinIO Object Storage (S3-compatible)
+  minio:
+    image: quay.io/minio/minio:latest
+    container_name: growtracker-minio
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+    ports:
+      - "9000:9000"  # API
+      - "9001:9001"  # Console
+    volumes:
+      - minio-data:/data
+    command: server --console-address ":9001" /data
+    networks:
+      - growtracker-network
+
+  # MinIO Client for bucket creation
+  minio-client:
+    image: minio/mc
+    container_name: growtracker-minio-client
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      sleep 5;
+      mc config host add myminio http://minio:9000 ${MINIO_ROOT_USER:-minioadmin} ${MINIO_ROOT_PASSWORD:-minioadmin};
+      mc mb --ignore-existing myminio/${MINIO_BUCKET:-growtracker};
+      mc anonymous set download myminio/${MINIO_BUCKET:-growtracker};
+      exit 0;
+      "
+    networks:
+      - growtracker-network
+
+volumes:
+  mongodb-data:
+  minio-data:
+
+networks:
+  growtracker-network:
+    driver: bridge

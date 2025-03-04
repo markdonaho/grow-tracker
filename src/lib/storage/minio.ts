@@ -1,17 +1,14 @@
 // src/lib/storage/minio.ts
-/**
- * This file provides storage utility functions that can work with either:
- * 1. Local MinIO during development
- * 2. Google Cloud Storage in production
- * 
- * For development with MinIO, you'll need to install:
- * npm install @aws-sdk/client-s3 @aws-sdk/s3-request-presigner
- * 
- * For production with GCP, you'll need to install:
- * npm install @google-cloud/storage
- */
+import { 
+  S3Client, 
+  PutObjectCommand, 
+  GetObjectCommand, 
+  DeleteObjectCommand 
+} from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { v4 as uuidv4 } from 'uuid';
 
-// We're creating a more generic interface that can work with different storage backends
+// Storage service interface
 export interface StorageService {
   uploadFile: (file: Buffer, key: string, contentType: string) => Promise<{ key: string }>;
   getPresignedUrl: (key: string, expiresIn?: number) => Promise<string>;
@@ -19,8 +16,88 @@ export interface StorageService {
   generateFileKey: (entityType: string, entityId: string, filename: string) => string;
 }
 
-// For now, we'll implement a mock storage service that logs operations
-// This will be replaced with actual implementations in Phase 2
+// MinIO storage service implementation
+class MinioStorageService implements StorageService {
+  private s3Client: S3Client;
+  private bucketName: string;
+
+  constructor() {
+    this.s3Client = new S3Client({
+      region: process.env.S3_REGION || 'us-east-1',
+      endpoint: process.env.S3_ENDPOINT || 'http://localhost:9000',
+      forcePathStyle: true,
+      credentials: {
+        accessKeyId: process.env.S3_ACCESS_KEY || 'minioadmin',
+        secretAccessKey: process.env.S3_SECRET_KEY || 'minioadmin',
+      },
+    });
+    this.bucketName = process.env.S3_BUCKET || 'growtracker';
+  }
+
+  /**
+   * Upload a file to storage
+   */
+  async uploadFile(file: Buffer, key: string, contentType: string): Promise<{ key: string }> {
+    // Create command to put object in bucket
+    const command = new PutObjectCommand({
+      Bucket: this.bucketName,
+      Key: key,
+      Body: file,
+      ContentType: contentType,
+    });
+
+    // Execute command
+    await this.s3Client.send(command);
+    
+    return { key };
+  }
+
+  /**
+   * Get a presigned URL for downloading a file
+   */
+  async getPresignedUrl(key: string, expiresIn = 3600): Promise<string> {
+    // Create command to get object from bucket
+    const command = new GetObjectCommand({
+      Bucket: this.bucketName,
+      Key: key,
+    });
+
+    // Generate signed URL
+    return getSignedUrl(this.s3Client, command, { expiresIn });
+  }
+
+  /**
+   * Delete a file from storage
+   */
+  async deleteFile(key: string): Promise<{ key: string }> {
+    // Create command to delete object from bucket
+    const command = new DeleteObjectCommand({
+      Bucket: this.bucketName,
+      Key: key,
+    });
+
+    // Execute command
+    await this.s3Client.send(command);
+    
+    return { key };
+  }
+
+  /**
+   * Generate a unique file key
+   */
+  generateFileKey(entityType: string, entityId: string, filename: string): string {
+    // Clean the filename to remove special characters
+    const cleanFilename = filename.replace(/[^a-zA-Z0-9.-]/g, '_');
+    
+    // Create a unique key using UUID
+    const uniqueId = uuidv4();
+    
+    // Path format: entityType/entityId/uniqueId-filename
+    return `${entityType.toLowerCase()}/${entityId}/${uniqueId}-${cleanFilename}`;
+  }
+}
+
+// For local development without MinIO, use a mock storage service
 class MockStorageService implements StorageService {
   async uploadFile(file: Buffer, key: string, contentType: string): Promise<{ key: string }> {
     console.log(`[MOCK] Uploading file with key: ${key}, contentType: ${contentType}, size: ${file.length} bytes`);
@@ -38,58 +115,22 @@ class MockStorageService implements StorageService {
   }
 
   generateFileKey(entityType: string, entityId: string, filename: string): string {
-    const timestamp = Date.now();
     const cleanFilename = filename.replace(/[^a-zA-Z0-9.-]/g, '_');
-    return `${entityType.toLowerCase()}/${entityId}/${timestamp}-${cleanFilename}`;
+    const uniqueId = uuidv4();
+    return `${entityType.toLowerCase()}/${entityId}/${uniqueId}-${cleanFilename}`;
   }
 }
 
-// Export the mock storage service for now
-export const storageService: StorageService = new MockStorageService();
+// Factory function for storage service - can be extended to support other storage providers
+export function createStorageService(): StorageService {
+  // Check if we should use mock storage
+  if (process.env.USE_MOCK_STORAGE === 'true') {
+    return new MockStorageService();
+  }
+  
+  // Otherwise, use MinIO for local development
+  return new MinioStorageService();
+}
 
-/**
- * IMPORTANT: In Phase 2, we'll implement the actual services below:
- * 
- * For MinIO (development):
- * ```
- * import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
- * import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
- * 
- * class MinioStorageService implements StorageService {
- *   private s3Client: S3Client;
- *   private bucketName: string;
- *
- *   constructor() {
- *     this.s3Client = new S3Client({
- *       region: process.env.S3_REGION || 'us-east-1',
- *       endpoint: process.env.S3_ENDPOINT,
- *       forcePathStyle: true,
- *       credentials: {
- *         accessKeyId: process.env.S3_ACCESS_KEY || '',
- *         secretAccessKey: process.env.S3_SECRET_KEY || '',
- *       },
- *     });
- *     this.bucketName = process.env.S3_BUCKET || 'growtracker';
- *   }
- * 
- *   // Implementation of StorageService methods using MinIO/S3...
- * }
- * ```
- * 
- * For Google Cloud Storage (production):
- * ```
- * import { Storage } from '@google-cloud/storage';
- * 
- * class GcpStorageService implements StorageService {
- *   private storage: Storage;
- *   private bucketName: string;
- * 
- *   constructor() {
- *     this.storage = new Storage();
- *     this.bucketName = process.env.GCP_BUCKET_NAME || 'growtracker';
- *   }
- * 
- *   // Implementation of StorageService methods using GCP...
- * }
- * ```
- */
+// Create and export the storage service instance
+export const storageService = createStorageService();
