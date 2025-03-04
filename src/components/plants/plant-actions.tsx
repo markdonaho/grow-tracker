@@ -3,53 +3,17 @@
 
 import { FC } from 'react';
 import { Calendar, Droplets, Scissors, Zap, Sprout } from 'lucide-react';
+import { format } from 'date-fns';
+import { usePlantActions } from '@/hooks/useActions';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface PlantActionsProps {
   plantId: string;
 }
 
-interface ActionItem {
-  id: string;
-  type: string;
-  date: string;
-  details: string;
-}
-
 const PlantActions: FC<PlantActionsProps> = ({ plantId }) => {
-  // Mock data - in a real app, this would come from your API
-  const mockActions: ActionItem[] = [
-    { 
-      id: '1', 
-      type: 'Watering', 
-      date: 'Feb 3, 2025', 
-      details: 'Standard watering, soil was quite dry.' 
-    },
-    { 
-      id: '2', 
-      type: 'Feeding', 
-      date: 'Jan 28, 2025', 
-      details: 'Tiger Bloom - 10ml, Big Bloom - 6ml' 
-    },
-    { 
-      id: '3', 
-      type: 'Pruning', 
-      date: 'Jan 13, 2025', 
-      details: 'Trimmed fan leaves and everything above trellis' 
-    },
-    { 
-      id: '4', 
-      type: 'Watering', 
-      date: 'Jan 10, 2025', 
-      details: 'Standard watering' 
-    },
-    { 
-      id: '5', 
-      type: 'Training', 
-      date: 'Jan 6, 2025', 
-      details: 'Trimmed fan leaves. Took 2 clippings for clones.' 
-    },
-  ];
-
+  const { actions, isLoading, isError } = usePlantActions(plantId);
+  
   const getActionIcon = (type: string) => {
     switch (type) {
       case 'Watering':
@@ -64,22 +28,73 @@ const PlantActions: FC<PlantActionsProps> = ({ plantId }) => {
         return <Calendar className="h-5 w-5" />;
     }
   };
+  
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        {[...Array(3)].map((_, i) => (
+          <div key={i} className="flex border-b pb-4 last:border-0 last:pb-0">
+            <div className="flex items-start mt-1 mr-4">
+              <Skeleton className="w-10 h-10 rounded-full" />
+            </div>
+            <div className="w-full">
+              <div className="flex items-center space-x-2">
+                <Skeleton className="h-5 w-24" />
+                <Skeleton className="h-4 w-20" />
+              </div>
+              <Skeleton className="h-4 w-full mt-2" />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+  
+  if (isError) {
+    return (
+      <div className="p-4 text-center">
+        <p>Error loading actions. Please try again.</p>
+      </div>
+    );
+  }
+  
+  if (actions.length === 0) {
+    return (
+      <div className="p-4 text-center">
+        <p>No actions recorded yet. Log your first action to get started.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
-      {mockActions.map((action) => (
-        <div key={action.id} className="flex border-b pb-4 last:border-0 last:pb-0">
+      {actions.map((action) => (
+        <div key={action._id?.toString()} className="flex border-b pb-4 last:border-0 last:pb-0">
           <div className="flex items-start mt-1 mr-4">
             <div className="p-2 rounded-full bg-primary/10">
-              {getActionIcon(action.type)}
+              {getActionIcon(action.actionType)}
             </div>
           </div>
           <div>
             <div className="flex items-center space-x-2">
-              <h4 className="font-medium">{action.type}</h4>
-              <div className="text-sm text-muted-foreground">{action.date}</div>
+              <h4 className="font-medium">{action.actionType}</h4>
+              <div className="text-sm text-muted-foreground">
+                {format(new Date(action.date), 'MMM d, yyyy')}
+              </div>
             </div>
-            <p className="mt-1">{action.details}</p>
+            <p className="mt-1">{action.notes || 'No details provided'}</p>
+            {action.details && action.details.nutrients && (
+              <div className="mt-2">
+                <p className="text-sm font-medium">Nutrients:</p>
+                <ul className="text-sm">
+                  {action.details.nutrients.map((nutrient, index) => (
+                    <li key={index}>
+                      {nutrient.name}: {nutrient.quantity}{nutrient.unit}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         </div>
       ))}

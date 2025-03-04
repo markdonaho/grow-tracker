@@ -1,4 +1,6 @@
 // src/app/plants/[id]/page.tsx
+"use client";
+
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -6,7 +8,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ChevronLeft, Edit, Plus, Upload } from "lucide-react";
 import PlantMetrics from "@/components/plants/plant-metrics";
 import PlantActions from "@/components/plants/plant-actions";
-import { use } from "react"; // Import the use function from React
+import PlantImages from "@/components/plants/plant-images";
+import { usePlant } from "@/hooks/usePlants";
+import { useRouter } from "next/navigation";
+import { Skeleton } from "@/components/ui/skeleton";
+import { format } from "date-fns";
+import { useImage } from "@/hooks/useImages";
+import { calculateAgeInDays } from "@/lib/utils";
 
 interface PlantDetailPageProps {
   params: {
@@ -15,23 +23,47 @@ interface PlantDetailPageProps {
 }
 
 export default function PlantDetailPage({ params }: PlantDetailPageProps) {
-  // Unwrap the params object with React.use()
-  const resolvedParams = use(Promise.resolve(params));
-  const { id } = resolvedParams;
+  const { id } = params;
+  const router = useRouter();
+  const { plant, isLoading, isError } = usePlant(id);
+  const coverImageId = plant?.coverImageId;
+  const { image: coverImage } = useImage(coverImageId || "");
   
-  // In a real application, this would fetch data from your API
-  const plant = {
-    id,
-    name: "Northern Lights",
-    strain: "Northern Lights",
-    status: "Growing",
-    growCycleType: "Flowering",
-    startDate: "2024-11-09",
-    currentHeight: 24,
-    notes: "This plant has been growing very well. Switched to flowering on January 5, 2025.",
-    daysToHarvest: 24,
-  };
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <Button variant="outline" size="icon" asChild>
+              <Link href="/plants">
+                <ChevronLeft className="h-4 w-4" />
+              </Link>
+            </Button>
+            <Skeleton className="h-8 w-48" />
+          </div>
+        </div>
+        
+        <Skeleton className="h-[400px] w-full" />
+      </div>
+    );
+  }
+  
+  if (isError || !plant) {
+    return (
+      <div className="p-6 text-center">
+        <h3 className="text-xl font-bold">Error loading plant</h3>
+        <p className="text-muted-foreground mt-2">
+          There was a problem loading the plant details. Please try again later.
+        </p>
+        <Button className="mt-4" onClick={() => router.push('/plants')}>
+          Return to Plants
+        </Button>
+      </div>
+    );
+  }
 
+  const ageInDays = calculateAgeInDays(plant.startDate);
+  
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -74,9 +106,78 @@ export default function PlantDetailPage({ params }: PlantDetailPageProps) {
           <TabsTrigger value="notes">Notes</TabsTrigger>
         </TabsList>
         
-        {/* Overview tab content remains the same */}
         <TabsContent value="overview" className="space-y-4">
-          {/* ... */}
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Plant Information</CardTitle>
+                  <CardDescription>Basic details about this plant</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <p className="text-sm font-medium">Strain</p>
+                    <p>{plant.strain}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Status</p>
+                    <p>{plant.status}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Current Cycle</p>
+                    <p>{plant.growCycleType}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Start Date</p>
+                    <p>{format(new Date(plant.startDate), 'MMMM d, yyyy')}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Age</p>
+                    <p>{ageInDays} days</p>
+                  </div>
+                  {plant.harvestDate && (
+                    <div>
+                      <p className="text-sm font-medium">Harvest Date</p>
+                      <p>{format(new Date(plant.harvestDate), 'MMMM d, yyyy')}</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+            
+            <div>
+              <Card className="h-full">
+                <CardHeader>
+                  <CardTitle>Growth Metrics</CardTitle>
+                  <CardDescription>Growth progress over time</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <PlantMetrics plantId={id} />
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+          
+          {plant.notes && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Notes</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p>{plant.notes}</p>
+              </CardContent>
+            </Card>
+          )}
+          
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent Actions</CardTitle>
+              <CardDescription>Last few actions performed</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <PlantActions plantId={id} />
+            </CardContent>
+          </Card>
         </TabsContent>
         
         <TabsContent value="actions" className="space-y-4">
@@ -114,11 +215,7 @@ export default function PlantDetailPage({ params }: PlantDetailPageProps) {
               </Button>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div className="aspect-square bg-muted flex items-center justify-center rounded-md">
-                  <p className="text-muted-foreground">No images yet</p>
-                </div>
-              </div>
+              <PlantImages plantId={id} />
             </CardContent>
           </Card>
         </TabsContent>
@@ -138,21 +235,20 @@ export default function PlantDetailPage({ params }: PlantDetailPageProps) {
               </Button>
             </CardHeader>
             <CardContent>
-              <div className="bg-muted p-4 rounded-md">
-                <p className="text-sm font-medium">January 5, 2025</p>
-                <p>Switched to flowering cycle. Plant is looking healthy with good leaf development.</p>
-              </div>
+              {plant.notes ? (
+                <div className="bg-muted p-4 rounded-md">
+                  <p className="text-sm font-medium">{format(new Date(plant.updatedAt), 'MMMM d, yyyy')}</p>
+                  <p>{plant.notes}</p>
+                </div>
+              ) : (
+                <div className="text-center p-4">
+                  <p className="text-muted-foreground">No notes added yet</p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
     </div>
   );
-}
-
-function calculateAgeInDays(dateString: string) {
-  const startDate = new Date(dateString);
-  const now = new Date();
-  const diffTime = now.getTime() - startDate.getTime();
-  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 }

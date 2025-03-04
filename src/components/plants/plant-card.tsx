@@ -20,29 +20,24 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { SP } from 'next/dist/shared/lib/utils';
+import { Plant } from '@/types/plant';
 
 interface PlantCardProps {
-  plant: {
-    id: string;
-    name: string;
-    strain: string;
-    status: string;
-    growCycleType: string;
-    startDate: string;
-    harvestDate?: string;
-    currentHeight: number;
-    daysToHarvest: number | null;
-  };
+  plant: Plant;
 }
 
 const PlantCard: FC<PlantCardProps> = ({ plant }) => {
   const ageInDays = calculateAgeInDays(plant.startDate);
   const statusColor = getStatusColor(plant.status);
   const cycleColor = getCycleColor(plant.growCycleType);
+  
+  // Get the latest height from growth metrics
+  const currentHeight = plant.growthMetrics && plant.growthMetrics.length > 0 
+    ? plant.growthMetrics[plant.growthMetrics.length - 1].height 
+    : 0;
 
-  function calculateAgeInDays(dateString: string) {
-    const startDate = new Date(dateString);
+  function calculateAgeInDays(dateValue: Date | string) {
+    const startDate = new Date(dateValue);
     const now = new Date();
     const diffTime = now.getTime() - startDate.getTime();
     return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -72,6 +67,11 @@ const PlantCard: FC<PlantCardProps> = ({ plant }) => {
     }
   }
 
+  // Calculate estimated harvest date (if flowering)
+  const daysToHarvest = plant.growCycleType === 'Flowering' ? 
+    Math.max(0, 63 - (plant.harvestDate ? 0 : ageInDays)) : 
+    null;
+
   return (
     <Card className="h-full flex flex-col">
       <CardHeader className="pb-2">
@@ -87,7 +87,7 @@ const PlantCard: FC<PlantCardProps> = ({ plant }) => {
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem>
-                <Link href={`/plants/${plant.id}`} className="flex w-full">View Details</Link>
+                <Link href={`/plants/${plant._id}`} className="flex w-full">View Details</Link>
               </DropdownMenuItem>
               <DropdownMenuItem>Log Action</DropdownMenuItem>
               <DropdownMenuItem>Edit Plant</DropdownMenuItem>
@@ -118,19 +118,19 @@ const PlantCard: FC<PlantCardProps> = ({ plant }) => {
           </div>
           <div className="flex items-center text-sm">
             <Ruler className="mr-2 h-4 w-4" />
-            <span>Height: {plant.currentHeight} cm</span>
+            <span>Height: {currentHeight} cm</span>
           </div>
-          {plant.daysToHarvest !== null && (
+          {daysToHarvest !== null && (
             <div className="flex items-center text-sm">
               <Badge className="mr-2 h-4 w-4" />
-              <span>Days to harvest: {plant.daysToHarvest}</span>
+              <span>Days to harvest: {daysToHarvest}</span>
             </div>
           )}
         </div>
       </CardContent>
       <CardFooter>
         <Button asChild className="w-full">
-          <Link href={`/plants/${plant.id}`}>View Details</Link>
+          <Link href={`/plants/${plant._id}`}>View Details</Link>
         </Button>
       </CardFooter>
     </Card>

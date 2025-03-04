@@ -7,8 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import PlantForm from '@/components/plants/plant-form';
-import { useEffect, useState } from 'react';
-import { use } from "react";
+import { usePlant } from '@/hooks/usePlants';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface EditPlantPageProps {
   params: {
@@ -16,37 +16,10 @@ interface EditPlantPageProps {
   };
 }
 
-// Define the plant data type
-interface PlantData {
-  name: string;
-  strain: string;
-  status: "Growing" | "Harvested" | "Archived";
-  growCycleType: "Vegetative" | "Flowering";
-  notes?: string;
-}
-
 export default function EditPlantPage({ params }: EditPlantPageProps) {
-  // Unwrap the params object with React.use()
-  const resolvedParams = use(Promise.resolve(params));
-  const { id } = resolvedParams;
+  const { id } = params;
   const router = useRouter();
-  const [plant, setPlant] = useState<PlantData | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // In a real app, this would fetch plant data from the API
-    // For Phase 1, we'll use mock data
-    const mockPlant: PlantData = {
-      name: "Northern Lights",
-      strain: "Northern Lights",
-      status: "Growing",
-      growCycleType: "Flowering",
-      notes: "This plant has been growing very well. Switched to flowering on January 5, 2025."
-    };
-    
-    setPlant(mockPlant);
-    setLoading(false);
-  }, [id]);
+  const { plant, isLoading, isError } = usePlant(id);
 
   const handlePlantUpdated = () => {
     // After updating a plant, navigate back to the plant details
@@ -54,9 +27,64 @@ export default function EditPlantPage({ params }: EditPlantPageProps) {
     router.refresh();
   };
 
-  if (loading) {
-    return <div>Loading...</div>;
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center space-x-4">
+          <Button variant="outline" size="icon" asChild>
+            <Link href={`/plants/${id}`}>
+              <ChevronLeft className="h-4 w-4" />
+            </Link>
+          </Button>
+          <h1 className="text-3xl font-bold">Edit Plant</h1>
+        </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Plant Details</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-64 w-full" />
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
+
+  if (isError || !plant) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center space-x-4">
+          <Button variant="outline" size="icon" asChild>
+            <Link href={`/plants/${id}`}>
+              <ChevronLeft className="h-4 w-4" />
+            </Link>
+          </Button>
+          <h1 className="text-3xl font-bold">Edit Plant</h1>
+        </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Error</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p>Could not load plant data. Please try again later.</p>
+            <Button className="mt-4" onClick={() => router.push(`/plants/${id}`)}>
+              Return to Plant
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const formData = {
+    name: plant.name,
+    strain: plant.strain,
+    status: plant.status,
+    growCycleType: plant.growCycleType,
+    notes: plant.notes || '',
+  };
 
   return (
     <div className="space-y-6">
@@ -74,13 +102,11 @@ export default function EditPlantPage({ params }: EditPlantPageProps) {
           <CardTitle>Plant Details</CardTitle>
         </CardHeader>
         <CardContent>
-          {plant && (
-            <PlantForm 
-              initialData={plant} 
-              plantId={id} 
-              onSuccess={handlePlantUpdated} 
-            />
-          )}
+          <PlantForm 
+            initialData={formData} 
+            plantId={id} 
+            onSuccess={handlePlantUpdated} 
+          />
         </CardContent>
       </Card>
     </div>

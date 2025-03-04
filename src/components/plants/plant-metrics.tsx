@@ -3,34 +3,50 @@
 
 import { FC } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { useGrowthMetrics } from '@/hooks/useGrowthMetrics';
+import { format } from 'date-fns';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface PlantMetricsProps {
   plantId: string;
 }
 
 const PlantMetrics: FC<PlantMetricsProps> = ({ plantId }) => {
-  // Mock data - in a real app, this would come from your API
-  const mockGrowthData = [
-    { date: '2024-11-09', height: 5 },
-    { date: '2024-11-16', height: 8 },
-    { date: '2024-11-23', height: 12 },
-    { date: '2024-11-30', height: 15 },
-    { date: '2024-12-07', height: 18 },
-    { date: '2024-12-14', height: 20 },
-    { date: '2024-12-21', height: 22 },
-    { date: '2024-12-28', height: 23 },
-    { date: '2025-01-04', height: 24 },
-    { date: '2025-01-11', height: 24 },
-    { date: '2025-01-18', height: 24 },
-    { date: '2025-01-25', height: 24 },
-    { date: '2025-02-01', height: 24 },
-  ];
+  const { metrics, isLoading, isError } = useGrowthMetrics(plantId);
+  
+  if (isLoading) {
+    return (
+      <div className="h-[300px] flex items-center justify-center">
+        <Skeleton className="w-full h-full" />
+      </div>
+    );
+  }
+  
+  if (isError) {
+    return (
+      <div className="h-[300px] flex items-center justify-center">
+        <p>Error loading growth metrics. Please try again.</p>
+      </div>
+    );
+  }
+  
+  if (metrics.length === 0) {
+    return (
+      <div className="h-[300px] flex items-center justify-center">
+        <p className="text-muted-foreground">No growth data recorded yet.</p>
+      </div>
+    );
+  }
 
-  // Format date for display
-  const formattedData = mockGrowthData.map(item => ({
+  // Format data for the chart
+  const formattedData = metrics.map(item => ({
     ...item,
-    formattedDate: new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    date: new Date(item.date),
+    formattedDate: format(new Date(item.date), 'MMM d')
   }));
+  
+  // Sort by date
+  formattedData.sort((a, b) => a.date.getTime() - b.date.getTime());
 
   return (
     <div className="h-[300px]">
@@ -40,8 +56,14 @@ const PlantMetrics: FC<PlantMetricsProps> = ({ plantId }) => {
           margin={{ top: 5, right: 20, left: 10, bottom: 5 }}
         >
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="formattedDate" />
-          <YAxis unit="cm" />
+          <XAxis 
+            dataKey="formattedDate" 
+            tick={{ fontSize: 12 }}
+          />
+          <YAxis 
+            unit="cm" 
+            tick={{ fontSize: 12 }}
+          />
           <Tooltip 
             formatter={(value) => [`${value} cm`, 'Height']}
             labelFormatter={(label) => `Date: ${label}`}
