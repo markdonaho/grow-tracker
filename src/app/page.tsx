@@ -21,7 +21,7 @@ export default function Home() {
             Grow Smarter, Not Harder
           </h1>
           <p className="text-xl md:text-2xl text-muted-foreground mb-8">
-            Track your cannabis cultivation from seed to harvest with GrowTracker's 
+            Track your cultivation from seed to harvest with GrowTracker's 
             comprehensive management system.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
