@@ -9,6 +9,16 @@ import { usePlants } from "@/hooks/usePlants";
 import { useRecentActions } from "@/hooks/useActions";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format, addDays } from "date-fns";
+import { Action } from "@/types/action";
+import { Plant } from "@/types/plant";
+
+// Define an interface for upcoming tasks
+interface UpcomingTask {
+  id: string;
+  type: string;
+  plantName: string;
+  date: Date;
+}
 
 export default function DashboardPage() {
   const { plants, isLoading: plantsLoading } = usePlants();
@@ -25,27 +35,33 @@ export default function DashboardPage() {
   });
   
   // Estimate days to harvest for flowering plants
-  let daysToHarvest = null;
+  let daysToHarvest: number | null = null;
   const floweringPlants = activePlants.filter(p => p.growCycleType === 'Flowering');
+  
   if (floweringPlants.length > 0) {
     // Find the plant closest to harvest (assuming 9 weeks/63 days flowering period)
     const today = new Date();
     let minDays = Infinity;
     
-    floweringPlants.forEach(plant => {
-      // If there's an action that marks the switch to flowering
-      const actions = plant.actions || [];
-      const switchToFloweringAction = actions.find(a => 
+    floweringPlants.forEach((plant: Plant) => {
+      // Find actions for this plant
+      const plantActions = actions?.filter(a => 
+        a.plantId.toString() === plant._id?.toString()
+      ) || [];
+      
+      // Look for a "switch to flowering" action
+      const switchToFloweringAction = plantActions.find(a => 
         a.notes && a.notes.toLowerCase().includes('switch to flower')
       );
       
-      let daysInFlowering;
+      let daysInFlowering: number;
       if (switchToFloweringAction) {
         const floweringStartDate = new Date(switchToFloweringAction.date);
-        daysInFlowering = Math.floor((today - floweringStartDate) / (1000 * 60 * 60 * 24));
+        daysInFlowering = Math.floor((today.getTime() - floweringStartDate.getTime()) / (1000 * 60 * 60 * 24));
       } else {
         // Estimate based on plant age
-        const plantAge = Math.floor((today - new Date(plant.startDate)) / (1000 * 60 * 60 * 24));
+        const plantStartDate = new Date(plant.startDate);
+        const plantAge = Math.floor((today.getTime() - plantStartDate.getTime()) / (1000 * 60 * 60 * 24));
         // Assume plants spend 4 weeks in veg before flowering
         daysInFlowering = Math.max(0, plantAge - 28);
       }
@@ -65,17 +81,17 @@ export default function DashboardPage() {
   const recentActionsCount = actions?.filter(a => new Date(a.date) >= weekAgo).length || 0;
   
   // Create upcoming tasks
-  const upcomingTasks = [];
+  const upcomingTasks: UpcomingTask[] = [];
   
   // Simple watering schedule - add watering tasks for each active plant
-  activePlants.forEach(plant => {
+  activePlants.forEach((plant: Plant) => {
     const plantActions = actions?.filter(a => 
       a.plantId.toString() === plant._id?.toString()
     ) || [];
     
     const lastWateringAction = plantActions
       .filter(a => a.actionType === 'Watering')
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+      .sort((a: Action, b: Action) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
     
     if (lastWateringAction) {
       const lastWateringDate = new Date(lastWateringAction.date);
@@ -93,7 +109,7 @@ export default function DashboardPage() {
   });
   
   // Sort by date
-  upcomingTasks.sort((a, b) => a.date.getTime() - b.date.getTime());
+  upcomingTasks.sort((a: UpcomingTask, b: UpcomingTask) => a.date.getTime() - b.date.getTime());
   
   if (plantsLoading || actionsLoading) {
     return (
@@ -182,7 +198,7 @@ export default function DashboardPage() {
                   <p className="text-muted-foreground">No upcoming tasks</p>
                 ) : (
                   <div className="space-y-4">
-                    {upcomingTasks.slice(0, 5).map(task => (
+                    {upcomingTasks.slice(0, 5).map((task: UpcomingTask) => (
                       <div key={task.id} className="flex justify-between items-center">
                         <div>
                           <p className="font-medium">{task.type} - {task.plantName}</p>

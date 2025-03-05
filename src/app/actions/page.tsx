@@ -9,12 +9,13 @@ import { format } from 'date-fns';
 import { useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePlant } from "@/hooks/usePlants";
+import { Action } from "@/types/action";
 
 export default function ActionsPage() {
   const { actions, isLoading, isError } = useRecentActions(50); // Get more actions for filtering
   const [activeTab, setActiveTab] = useState('all');
 
-  const getActionIcon = (type: string) => {
+  const getActionIcon = (type: string): React.ReactNode => {
     switch (type) {
       case 'Watering':
         return <Droplets className="h-5 w-5" />;
@@ -29,7 +30,7 @@ export default function ActionsPage() {
     }
   };
 
-  const renderActions = (filteredActions: any[]) => {
+  const renderActions = (filteredActions: Action[]) => {
     if (filteredActions.length === 0) {
       return (
         <div className="p-6 text-center">
@@ -153,16 +154,13 @@ export default function ActionsPage() {
   );
 }
 
-// Helper component for displaying an action with plant info
-interface Action {
-  _id: string;
-  actionType: string;
-  date: string;
-  plantId: string;
-  notes?: string;
+// Define interface for ActionItem props
+interface ActionItemProps {
+  action: Action;
+  getActionIcon: (type: string) => React.ReactNode;
 }
 
-function ActionItem({ action, getActionIcon }: { action: Action; getActionIcon: (type: string) => JSX.Element }) {
+function ActionItem({ action, getActionIcon }: ActionItemProps) {
   const { plant } = usePlant(action.plantId.toString());
   
   return (
