@@ -26,6 +26,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { plantsApi } from '@/lib/api-mutations';
+import { showSuccessToast, showErrorToast } from '@/lib/utils';
 
 // Define the form schema with Zod
 const plantFormSchema = z.object({
@@ -63,22 +65,18 @@ const PlantForm: FC<PlantFormProps> = ({ initialData, plantId, onSuccess }) => {
   // Form submission handler
   const onSubmit = async (values: PlantFormValues) => {
     try {
-      const endpoint = isEditing ? `/api/plants/${plantId}` : '/api/plants';
-      const method = isEditing ? 'PATCH' : 'POST';
-
-      const response = await fetch(endpoint, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      if (isEditing) {
+        // Update existing plant
+        await plantsApi.update(plantId, values);
+        showSuccessToast('Plant updated successfully');
+      } else {
+        // Create new plant
+        await plantsApi.create({
           ...values,
-          startDate: new Date().toISOString(),
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to save plant');
+          startDate: new Date(),
+          growthMetrics: []
+        });
+        showSuccessToast('Plant created successfully');
       }
 
       if (onSuccess) {
@@ -89,7 +87,7 @@ const PlantForm: FC<PlantFormProps> = ({ initialData, plantId, onSuccess }) => {
       }
     } catch (error) {
       console.error('Error saving plant:', error);
-      // Here you might want to display an error message to the user
+      showErrorToast('Failed to save plant. Please try again.');
     }
   };
 

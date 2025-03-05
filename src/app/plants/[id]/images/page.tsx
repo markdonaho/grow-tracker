@@ -1,60 +1,81 @@
 // src/app/plants/[id]/images/page.tsx
 "use client";
 
-import { useState } from 'react';
-import Link from "next/link";
+import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChevronLeft } from "lucide-react";
-import ImageUpload from "@/components/upload/image-upload";
-import { use } from "react";
+import Link from "next/link";
+import ImageUpload from '@/components/upload/image-upload';
+import { usePlant } from '@/hooks/usePlants';
+import { Skeleton } from '@/components/ui/skeleton';
 
-interface ImagesPageProps {
+interface ImageUploadPageProps {
   params: {
     id: string;
   };
 }
 
-export default function ImagesPage({ params }: ImagesPageProps) {
-  const resolvedParams = use(Promise.resolve(params));
-  const { id } = resolvedParams;
-  const [images, setImages] = useState<{ id: string; url: string; date: string }[]>([]);
+export default function ImageUploadPage({ params }: ImageUploadPageProps) {
+  const { id } = params;
+  const router = useRouter();
+  const { plant, isLoading, isError } = usePlant(id);
 
-  const handleImageUpload = async (file: File) => {
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('entityType', 'Plant');
-      formData.append('entityId', id);
-
-      const response = await fetch('/api/uploads', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to upload image');
-      }
-
-      const data = await response.json();
-      
-      // In a real app, you'd refresh the images list from the server
-      // For now, we'll add a mock entry
-      setImages(prev => [
-        ...prev,
-        { 
-          id: data._id || `mock-${Date.now()}`,
-          url: URL.createObjectURL(file),
-          date: new Date().toLocaleDateString()
-        }
-      ]);
-
-      return data;
-    } catch (error) {
-      console.error('Error uploading image:', error);
-      throw error;
-    }
+  const handleUploadComplete = () => {
+    // Navigate back to the plant's images tab
+    router.push(`/plants/${id}?tab=images`);
   };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center space-x-4">
+          <Button variant="outline" size="icon" asChild>
+            <Link href={`/plants/${id}`}>
+              <ChevronLeft className="h-4 w-4" />
+            </Link>
+          </Button>
+          <Skeleton className="h-8 w-48" />
+        </div>
+
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-32" />
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-64 w-full" />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (isError || !plant) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center space-x-4">
+          <Button variant="outline" size="icon" asChild>
+            <Link href={`/plants/${id}`}>
+              <ChevronLeft className="h-4 w-4" />
+            </Link>
+          </Button>
+          <h1 className="text-3xl font-bold">Upload Images</h1>
+        </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Error</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p>Could not load plant data. Please try again later.</p>
+            <Button className="mt-4" onClick={() => router.push(`/plants/${id}`)}>
+              Return to Plant
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -64,44 +85,19 @@ export default function ImagesPage({ params }: ImagesPageProps) {
             <ChevronLeft className="h-4 w-4" />
           </Link>
         </Button>
-        <h1 className="text-3xl font-bold">Plant Images</h1>
+        <h1 className="text-3xl font-bold">Upload Images for {plant.name}</h1>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Upload New Images</CardTitle>
+          <CardTitle>Upload Plant Images</CardTitle>
         </CardHeader>
         <CardContent>
           <ImageUpload 
-            onUpload={handleImageUpload} 
             entityType="Plant" 
             entityId={id} 
+            onUploadComplete={handleUploadComplete}
           />
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Image Gallery</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {images.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {images.map((image) => (
-                <div key={image.id} className="aspect-square rounded-md overflow-hidden">
-                  <img 
-                    src={image.url} 
-                    alt="Plant" 
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="aspect-square bg-muted flex items-center justify-center rounded-md max-w-md mx-auto">
-              <p className="text-muted-foreground">No images uploaded yet</p>
-            </div>
-          )}
         </CardContent>
       </Card>
     </div>

@@ -5,19 +5,22 @@ import { useState, useRef } from "react";
 import { Upload, X, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { imagesApi } from "@/lib/api-mutations";
+import { showSuccessToast, showErrorToast } from "../../lib/utils";
 
 interface ImageUploadProps {
-  onUpload: (file: File) => Promise<void>;
-  entityType: string;
+  onUpload?: (file: File) => Promise<void>;
+  entityType: "Plant" | "Action";
   entityId: string;
   maxFiles?: number;
+  onUploadComplete?: () => void;
 }
 
 export default function ImageUpload({ 
-  onUpload, 
   entityType, 
   entityId, 
-  maxFiles = 5 
+  maxFiles = 5,
+  onUploadComplete
 }: ImageUploadProps) {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
@@ -31,7 +34,7 @@ export default function ImageUpload({
       // Limit the number of files
       const totalFiles = [...selectedFiles, ...newFiles];
       if (totalFiles.length > maxFiles) {
-        alert(`You can only upload a maximum of ${maxFiles} images.`);
+        showErrorToast(`You can only upload a maximum of ${maxFiles} images.`);
         return;
       }
       
@@ -63,17 +66,21 @@ export default function ImageUpload({
     
     try {
       for (const file of selectedFiles) {
-        await onUpload(file);
+        await imagesApi.upload(file, entityType, entityId);
       }
       
       // Clear selections after successful upload
       setPreviews([]);
       setSelectedFiles([]);
       
-      alert('Files uploaded successfully!');
+      showSuccessToast('Images uploaded successfully!');
+      
+      if (onUploadComplete) {
+        onUploadComplete();
+      }
     } catch (error) {
       console.error('Error uploading files:', error);
-      alert('Error uploading files. Please try again.');
+      showErrorToast('Error uploading files. Please try again.');
     } finally {
       setIsUploading(false);
     }
@@ -142,3 +149,4 @@ export default function ImageUpload({
     </div>
   );
 }
+                  

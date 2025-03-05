@@ -1,7 +1,7 @@
 // src/components/forms/action-form.tsx
 'use client';
 
-import { FC } from 'react';
+import { FC, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -26,6 +26,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { actionsApi } from '@/lib/api-mutations';
+import { showSuccessToast, showErrorToast } from '@/lib/utils';
+import { X } from 'lucide-react';
 
 const actionTypes = [
   'Watering',
@@ -48,6 +51,12 @@ const actionFormSchema = z.object({
 
 type ActionFormValues = z.infer<typeof actionFormSchema>;
 
+interface Nutrient {
+  name: string;
+  quantity: number;
+  unit: string;
+}
+
 interface ActionFormProps {
   plantId: string;
   initialData?: Partial<ActionFormValues>;
@@ -63,6 +72,10 @@ const ActionForm: FC<ActionFormProps> = ({
 }) => {
   const router = useRouter();
   const isEditing = !!actionId;
+  const [nutrients, setNutrients] = useState<Nutrient[]>([]);
+  const [nutrientName, setNutrientName] = useState('');
+  const [nutrientQuantity, setNutrientQuantity] = useState('');
+  const [nutrientUnit, setNutrientUnit] = useState('ml');
 
   // Initialize form with react-hook-form
   const form = useForm<ActionFormValues>({
@@ -75,24 +88,54 @@ const ActionForm: FC<ActionFormProps> = ({
     },
   });
 
+  const actionType = form.watch('actionType');
+
+  const addNutrient = () => {
+    if (!nutrientName || !nutrientQuantity) {
+      showErrorToast('Please provide a name and quantity');
+      return;
+    }
+
+    setNutrients([
+      ...nutrients,
+      {
+        name: nutrientName,
+        quantity: parseFloat(nutrientQuantity),
+        unit: nutrientUnit,
+      },
+    ]);
+
+    // Reset the inputs
+    setNutrientName('');
+    setNutrientQuantity('');
+  };
+
+  const removeNutrient = (index: number) => {
+    const newNutrients = [...nutrients];
+    newNutrients.splice(index, 1);
+    setNutrients(newNutrients);
+  };
+
   // Submit handler
   const onSubmit = async (values: ActionFormValues) => {
     try {
-      const endpoint = isEditing
-        ? `/api/actions/${actionId}`
-        : '/api/actions';
-      const method = isEditing ? 'PATCH' : 'POST';
+      // Prepare details object for nutrients if present
+      const details = actionType === 'Feeding' && nutrients.length > 0
+        ? { nutrients }
+        : undefined;
 
-      const response = await fetch(endpoint, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(values),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to save action');
+      if (isEditing) {
+        await actionsApi.update(actionId, {
+          ...values,
+          details,
+        });
+        showSuccessToast('Action updated successfully');
+      } else {
+        await actionsApi.create({
+          ...values,
+          details,
+        });
+        showSuccessToast('Action logged successfully');
       }
 
       if (onSuccess) {
@@ -103,7 +146,7 @@ const ActionForm: FC<ActionFormProps> = ({
       }
     } catch (error) {
       console.error('Error saving action:', error);
-      // Here you might want to display an error message to the user
+      showErrorToast('Failed to save action. Please try again.');
     }
   };
 
@@ -158,18 +201,75 @@ const ActionForm: FC<ActionFormProps> = ({
           )}
         />
 
-        {form.watch('actionType') === 'Feeding' && (
+        {actionType === 'Feeding' && (
           <div className="bg-muted p-4 rounded-md">
             <h3 className="font-medium mb-2">Nutrients</h3>
+            
+            {nutrients.length > 0 && (
+              <div className="mb-4">
+                <h4 className="text-sm font-medium mb-2">Added Nutrients:</h4>
+                <ul className="space-y-2">
+                  {nutrients.map((nutrient, index) => (
+                    <li key={index} className="flex items-center justify-between bg-background p-2 rounded">
+                      <span>
+                        {nutrient.name}: {nutrient.quantity}{nutrient.unit}
+                      </span>
+                      <Button 
+                        type="button" 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => removeNutrient(index)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            
             <div className="space-y-4">
               <div className="grid grid-cols-4 gap-4">
-                <Input placeholder="Name (e.g., Tiger Bloom)" />
-                <Input placeholder="Quantity" type="number" min="0" step="0.1" />
-                <Input placeholder="Unit (e.g., ml)" />
-                <Button type="button" variant="outline">
-                  Add
-                </Button>
+                <div className="col-span-2">
+                  <Input 
+                    placeholder="Name (e.g., Tiger Bloom)" 
+                    value={nutrientName}
+                    onChange={(e) => setNutrientName(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <Input 
+                    placeholder="Quantity" 
+                    type="number" 
+                    min="0" 
+                    step="0.1" 
+                    value={nutrientQuantity}
+                    onChange={(e) => setNutrientQuantity(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <Select 
+                    value={nutrientUnit}
+                    onValueChange={setNutrientUnit}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Unit" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ml">ml</SelectItem>
+                      <SelectItem value="tsp">tsp</SelectItem>
+                      <SelectItem value="g">g</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
+              <Button 
+                type="button" 
+                variant="outline"
+                onClick={addNutrient}
+              >
+                Add Nutrient
+              </Button>
               <p className="text-sm text-muted-foreground">
                 Add the nutrients used in this feeding.
               </p>
