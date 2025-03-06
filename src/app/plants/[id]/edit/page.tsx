@@ -9,15 +9,18 @@ import Link from "next/link";
 import PlantForm from '@/components/plants/plant-form';
 import { usePlant } from '@/hooks/usePlants';
 import { Skeleton } from '@/components/ui/skeleton';
+import { use } from "react";
 
 interface EditPlantPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default function EditPlantPage({ params }: EditPlantPageProps) {
-  const { id } = params;
+  const resolvedParams = use(params);
+  const { id } = resolvedParams;
+  
   const router = useRouter();
   const { plant, isLoading, isError } = usePlant(id);
 

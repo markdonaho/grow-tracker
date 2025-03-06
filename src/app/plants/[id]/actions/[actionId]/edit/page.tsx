@@ -11,10 +11,10 @@ import { useEffect, useState } from 'react';
 import { use } from "react";
 
 interface EditActionPageProps {
-  params: {
+  params: Promise<{
     id: string;
     actionId: string;
-  };
+  }>;
 }
 
 // Define the action type
@@ -26,7 +26,7 @@ interface ActionData {
 
 export default function EditActionPage({ params }: EditActionPageProps) {
   // Unwrap the params object with React.use()
-  const resolvedParams = use(Promise.resolve(params));
+  const resolvedParams = use(params);
   const { id, actionId } = resolvedParams;
   const router = useRouter();
   const [action, setAction] = useState<ActionData | null>(null);

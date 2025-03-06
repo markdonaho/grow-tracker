@@ -22,9 +22,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 
 interface NewNotePageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 const noteSchema = z.object({
@@ -36,7 +36,7 @@ type NoteFormValues = z.infer<typeof noteSchema>;
 
 export default function NewNotePage({ params }: NewNotePageProps) {
   // Unwrap the params object with React.use()
-  const resolvedParams = use(Promise.resolve(params));
+  const resolvedParams = use(params);
   const { id } = resolvedParams;
   const router = useRouter();
 

@@ -10,14 +10,14 @@ import ActionForm from '@/components/forms/action-form';
 import { use } from "react";
 
 interface NewActionPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default function NewActionPage({ params }: NewActionPageProps) {
   // Unwrap the params object with React.use()
-  const resolvedParams = use(Promise.resolve(params));
+  const resolvedParams = use(params);
   const { id } = resolvedParams;
   const router = useRouter();
 
