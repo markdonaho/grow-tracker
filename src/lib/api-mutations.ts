@@ -1,4 +1,7 @@
 // src/lib/api-mutations.ts
+import { Plant, GrowthMetric } from '@/types/plant';
+import { Action } from '@/types/action';
+type CreatePlantData = Omit<Plant, '_id' | 'createdAt' | 'updatedAt'>;
 
 /**
  * Generic API call with error handling
@@ -60,12 +63,14 @@ async function apiCall<T = unknown, B = Record<string, unknown>>(
     /**
      * Create a new plant
      */
-    create: (data: any) => apiCall('/api/plants', 'POST', data),
+    
+
+    create: (data: CreatePlantData) => apiCall<Plant, CreatePlantData>('/api/plants', 'POST', data),
   
     /**
      * Update a plant
      */
-    update: (id: string, data: any) => apiCall(`/api/plants/${id}`, 'PATCH', data),
+    update: (id: string, data: Partial<Plant>) => apiCall<Plant, Partial<Plant>>(`/api/plants/${id}`, 'PATCH', data),
   
     /**
      * Delete a plant
@@ -75,8 +80,8 @@ async function apiCall<T = unknown, B = Record<string, unknown>>(
     /**
      * Add a growth metric to a plant
      */
-    addGrowthMetric: (id: string, data: any) => 
-      apiCall(`/api/plants/${id}/growth`, 'POST', data),
+    addGrowthMetric: (id: string, data: Omit<GrowthMetric, 'id'>) => 
+      apiCall<GrowthMetric[], Omit<GrowthMetric, 'id'>>(`/api/plants/${id}/growth`, 'POST', data),
   
     /**
      * Mark a plant as harvested
@@ -90,12 +95,14 @@ async function apiCall<T = unknown, B = Record<string, unknown>>(
     /**
      * Create a new action
      */
-    create: (data: any) => apiCall('/api/actions', 'POST', data),
+    create: (data: Omit<Action, '_id' | 'createdAt' | 'updatedAt'>) => 
+      apiCall<Action, Omit<Action, '_id' | 'createdAt' | 'updatedAt'>>('/api/actions', 'POST', data),
   
     /**
      * Update an action
      */
-    update: (id: string, data: any) => apiCall(`/api/actions/${id}`, 'PATCH', data),
+    update: (id: string, data: Partial<Action>) => 
+      apiCall<Action, Partial<Action>>(`/api/actions/${id}`, 'PATCH', data),
   
     /**
      * Delete an action

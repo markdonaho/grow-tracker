@@ -13,7 +13,7 @@ import { usePlant } from "@/hooks/usePlants";
 import { useRouter } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
-import { useImage } from "@/hooks/useImages";
+// import { useImage } from "@/hooks/useImages";
 import { calculateAgeInDays } from "@/lib/utils";
 import { use } from "react";
 
@@ -29,8 +29,8 @@ export default function PlantDetailPage({ params }: PlantDetailPageProps) {
   
   const router = useRouter();
   const { plant, isLoading, isError } = usePlant(id);
-  const coverImageId = plant?.coverImageId;
-  const { image: coverImage } = useImage(coverImageId || "");
+  // const coverImageId = plant?.coverImageId;
+  // const { image: coverImage } = useImage(coverImageId || "");
   
   if (isLoading) {
     return (

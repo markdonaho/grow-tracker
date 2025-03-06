@@ -8,20 +8,22 @@ import { Trash } from "lucide-react";
 import { imagesApi } from "@/lib/api-mutations";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
+import Image from 'next/image';
 
 interface PlantImagesProps {
   plantId: string;
 }
 
 const PlantImages: FC<PlantImagesProps> = ({ plantId }) => {
-  const { images, isLoading, isError, mutate } = useEntityImages("Plant", plantId);
+  const { images, isLoading, isError: imageError, mutate } = useEntityImages("Plant", plantId);
 
   const handleDeleteImage = async (imageId: string) => {
     try {
       await imagesApi.delete(imageId);
       toast.success("Image deleted successfully");
       mutate();
-    } catch (error) {
+     
+    } catch {
       toast.error("Failed to delete image");
     }
   };
@@ -36,7 +38,7 @@ const PlantImages: FC<PlantImagesProps> = ({ plantId }) => {
     );
   }
 
-  if (isError) {
+  if (imageError) {
     return <div>Error loading images. Please try again.</div>;
   }
 
@@ -52,10 +54,11 @@ const PlantImages: FC<PlantImagesProps> = ({ plantId }) => {
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {images.map((image) => (
         <div key={image._id?.toString()} className="group relative aspect-square rounded-md overflow-hidden">
-          <img
+          <Image
             src={image.url}
             alt={image.filename}
-            className="w-full h-full object-cover"
+            fill
+            className="object-cover"
           />
           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
             <Button

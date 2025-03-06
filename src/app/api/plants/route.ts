@@ -3,8 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { 
   getPlants, 
   getActivePlants,
-  createPlant,
-  getPlantById
+  createPlant
 } from '@/lib/db/plants';
 import { Plant } from '@/types/plant';
 

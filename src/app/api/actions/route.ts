@@ -5,7 +5,6 @@ import {
   getActionsForPlant, 
   createAction 
 } from '@/lib/db/actions';
-import { createObjectId } from '@/lib/db/mongodb';
 
 /**
  * GET /api/actions - Get recent actions or actions for a specific plant

@@ -11,7 +11,7 @@ export interface Nutrient {
 
 export interface ActionDetails {
   nutrients?: Nutrient[];
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface Action {

@@ -29,6 +29,7 @@ import {
 import { actionsApi } from '@/lib/api-mutations';
 import { showSuccessToast, showErrorToast } from '@/lib/utils';
 import { X } from 'lucide-react';
+import { ActionType } from '@/types/action';
 
 const actionTypes = [
   'Watering',
@@ -82,7 +83,7 @@ const ActionForm: FC<ActionFormProps> = ({
     resolver: zodResolver(actionFormSchema),
     defaultValues: {
       plantId: plantId,
-      actionType: (initialData?.actionType as any) || 'Watering',
+      actionType: (initialData?.actionType as ActionType) || 'Watering',
       date: initialData?.date || new Date().toISOString().slice(0, 10),
       notes: initialData?.notes || '',
     },
@@ -119,25 +120,31 @@ const ActionForm: FC<ActionFormProps> = ({
   // Submit handler
   const onSubmit = async (values: ActionFormValues) => {
     try {
+      // Convert string date to Date object
+      const formattedValues = {
+        ...values,
+        date: new Date(values.date) // Convert string to Date object
+      };
+  
       // Prepare details object for nutrients if present
       const details = actionType === 'Feeding' && nutrients.length > 0
         ? { nutrients }
         : undefined;
-
+  
       if (isEditing) {
         await actionsApi.update(actionId, {
-          ...values,
+          ...formattedValues,
           details,
         });
         showSuccessToast('Action updated successfully');
       } else {
         await actionsApi.create({
-          ...values,
+          ...formattedValues,
           details,
         });
         showSuccessToast('Action logged successfully');
       }
-
+  
       if (onSuccess) {
         onSuccess();
       } else {
@@ -149,6 +156,7 @@ const ActionForm: FC<ActionFormProps> = ({
       showErrorToast('Failed to save action. Please try again.');
     }
   };
+  
 
   return (
     <Form {...form}>

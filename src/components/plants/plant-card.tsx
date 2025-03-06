@@ -1,7 +1,6 @@
 // src/components/plants/plant-card.tsx
 import { FC } from 'react';
 import Link from 'next/link';
-import { formatDistance } from 'date-fns';
 import { Sprout, Ruler, Calendar, Badge, MoreVertical } from 'lucide-react';
 import {
   Card,

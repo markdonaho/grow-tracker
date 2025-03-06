@@ -3,9 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { 
   getPlantById, 
   updatePlant, 
-  deletePlant, 
-  addGrowthMetric,
-  harvestPlant
+  deletePlant
 } from '@/lib/db/plants';
 
 type RouteParams = {

@@ -7,8 +7,7 @@ import {
   CardHeader, 
   CardTitle, 
   CardDescription, 
-  CardContent, 
-  CardFooter 
+  CardContent
 } from '@/components/ui/card';
 
 export default function Home() {
@@ -55,7 +54,7 @@ export default function Home() {
                 </div>
                 <CardTitle>Plant Tracking</CardTitle>
                 <CardDescription>
-                  Monitor each plant's lifecycle from seedling to harvest
+                  Monitor each plant&apos;s lifecycle from seedling to harvest
                 </CardDescription>
               </CardHeader>
               <CardContent>

@@ -1,5 +1,5 @@
 // src/lib/db/actions.ts
-import { ObjectId } from 'mongodb';
+// import { ObjectId } from 'mongodb';
 import { 
   getActionsCollection, 
   createObjectId, 
@@ -97,7 +97,7 @@ export async function createAction(
   };
   
   const collection = await getActionsCollection();
-  const result = await collection.insertOne(newAction as any);
+  const result = await collection.insertOne(newAction as Omit<Action, '_id'>);
   
   return {
     ...newAction,

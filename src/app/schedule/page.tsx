@@ -1,7 +1,7 @@
 // src/app/schedule/page.tsx
 "use client";
 
-import { useState } from 'react';
+// import { useState } from 'react';
 import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
@@ -77,10 +77,14 @@ const mockEvents = [
 ];
 
 export default function SchedulePage() {
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  // const [ setSelectedDate] = useState(new Date());
   
   // Function to get event style based on event type
-  const eventStyleGetter = (event: any) => {
+  interface CalendarEvent {
+    type: string;
+    completed: boolean;
+  }
+  const eventStyleGetter = (event: CalendarEvent) => {
     let backgroundColor = '#10b981'; // Default green
     
     switch (event.type) {
@@ -137,7 +141,6 @@ export default function SchedulePage() {
               endAccessor="end"
               style={{ height: '100%' }}
               eventPropGetter={eventStyleGetter}
-              onNavigate={(date) => setSelectedDate(date)}
               views={['month', 'week', 'day', 'agenda']}
               defaultView="month"
             />

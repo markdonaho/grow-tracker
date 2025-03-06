@@ -2,11 +2,12 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Upload, X, Image as ImageIcon } from "lucide-react";
+import { Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { imagesApi } from "@/lib/api-mutations";
 import { showSuccessToast, showErrorToast } from "../../lib/utils";
+import Image from 'next/image';
 
 interface ImageUploadProps {
   onUpload?: (file: File) => Promise<void>;
@@ -118,10 +119,10 @@ export default function ImageUpload({
                 key={index} 
                 className="relative aspect-square overflow-hidden group"
               >
-                <img 
+                <Image 
                   src={preview} 
                   alt={`Preview ${index}`} 
-                  className="object-cover w-full h-full"
+                  className="object-cover"
                 />
                 <Button
                   type="button"

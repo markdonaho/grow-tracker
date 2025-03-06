@@ -2,9 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { 
   getActionById, 
   updateAction, 
-  deleteAction,
-  addImageToAction,
-  removeImageFromAction
+  deleteAction
 } from '@/lib/db/actions';
 
 // Fix the type definition for route parameters

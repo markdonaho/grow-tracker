@@ -1,5 +1,5 @@
 // src/lib/db/plants.ts
-import { ObjectId } from 'mongodb';
+// import { ObjectId } from 'mongodb';
 import { 
   getPlantsCollection, 
   createObjectId, 
@@ -50,7 +50,7 @@ export async function createPlant(plantData: Omit<Plant, '_id' | 'createdAt' | '
   };
   
   const collection = await getPlantsCollection();
-  const result = await collection.insertOne(newPlant as any);
+  const result = await collection.insertOne(newPlant as Omit<Plant, '_id'>);
   
   return {
     ...newPlant,

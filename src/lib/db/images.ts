@@ -1,5 +1,5 @@
 // src/lib/db/images.ts
-import { ObjectId } from 'mongodb';
+// import { ObjectId } from 'mongodb';
 import { 
   getImagesCollection, 
   createObjectId, 
@@ -27,7 +27,7 @@ export async function createImageMetadata(
     };
     
     const collection = await getImagesCollection();
-    const result = await collection.insertOne(metadata as any);
+    const result = await collection.insertOne(metadata as Omit<ImageMetadata, '_id'>);
     
     return {
       ...metadata,

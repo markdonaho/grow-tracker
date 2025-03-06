@@ -73,8 +73,8 @@ export async function connectToDatabase(): Promise<{ client: MongoClient; db: Db
       globalMongoConnection.db = db;
       
       resolve({ client, db });
-    } catch (error) {
-      reject(error);
+    } catch (err) {
+      reject(err);
     }
   });
 
@@ -86,7 +86,7 @@ export async function connectToDatabase(): Promise<{ client: MongoClient; db: Db
  */
 export async function getCollection<T extends Document>(collectionName: string): Promise<Collection<T>> {
   const { db } = await connectToDatabase();
-  return db.collection<T>(collectionName);
+  return db.collection<T & Document>(collectionName);
 }
 
 /**
@@ -110,7 +110,8 @@ export async function getImagesCollection(): Promise<Collection<ImageMetadata>> 
 export function createObjectId(id: string): ObjectId {
   try {
     return new ObjectId(id);
-  } catch (error) {
+   
+  } catch {
     throw new Error(`Invalid ObjectId: ${id}`);
   }
 }
@@ -128,7 +129,7 @@ export function sanitizeDocuments<T>(documents: T[]): T[] {
 export function sanitizeDocument<T>(document: T): T {
   if (!document) return document;
   
-  const sanitized = { ...document } as any;
+  const sanitized = { ...document } as Record<string, unknown>;
   
   if (sanitized._id instanceof ObjectId) {
     sanitized._id = sanitized._id.toString();
