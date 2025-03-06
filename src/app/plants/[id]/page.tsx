@@ -15,15 +15,18 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 import { useImage } from "@/hooks/useImages";
 import { calculateAgeInDays } from "@/lib/utils";
+import { use } from "react";
 
 interface PlantDetailPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default function PlantDetailPage({ params }: PlantDetailPageProps) {
-  const { id } = params;
+  const resolvedParams = use(params);
+  const { id } = resolvedParams;
+  
   const router = useRouter();
   const { plant, isLoading, isError } = usePlant(id);
   const coverImageId = plant?.coverImageId;

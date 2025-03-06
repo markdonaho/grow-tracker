@@ -9,15 +9,18 @@ import Link from "next/link";
 import ImageUpload from '@/components/upload/image-upload';
 import { usePlant } from '@/hooks/usePlants';
 import { Skeleton } from '@/components/ui/skeleton';
+import { use } from "react";
 
 interface ImageUploadPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default function ImageUploadPage({ params }: ImageUploadPageProps) {
-  const { id } = params;
+  const resolvedParams = use(params);
+  const { id } = resolvedParams;
+  
   const router = useRouter();
   const { plant, isLoading, isError } = usePlant(id);
 

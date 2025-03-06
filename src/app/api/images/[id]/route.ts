@@ -2,11 +2,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getImageMetadataById, getImageUrl, deleteImage } from '@/lib/db/images';
 
-interface RouteParams {
-  params: {
-    id: string;
-  };
-}
+type RouteParams = {
+  params: { id: string };
+};
 
 /**
  * GET /api/images/[id] - Get image metadata and URL

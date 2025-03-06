@@ -6,14 +6,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar, Droplets, Scissors, Sprout, Zap } from "lucide-react";
 import { useRecentActions } from "@/hooks/useActions";
 import { format } from 'date-fns';
-import { useState } from "react";
+// import { useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePlant } from "@/hooks/usePlants";
 import { Action } from "@/types/action";
 
 export default function ActionsPage() {
   const { actions, isLoading, isError } = useRecentActions(50); // Get more actions for filtering
-  const [activeTab, setActiveTab] = useState('all');
+  // const [activeTab, setActiveTab] = useState('all');
 
   const getActionIcon = (type: string): React.ReactNode => {
     switch (type) {
@@ -112,7 +112,7 @@ export default function ActionsPage() {
       <Tabs 
         defaultValue="all" 
         className="space-y-4"
-        onValueChange={setActiveTab}
+        // onValueChange={setActiveTab}
       >
         <TabsList>
           <TabsTrigger value="all">All Activities</TabsTrigger>
