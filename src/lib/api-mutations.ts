@@ -3,10 +3,10 @@
 /**
  * Generic API call with error handling
  */
-async function apiCall<T = any>(
+async function apiCall<T = unknown, B = Record<string, unknown>>(
     url: string, 
     method: string, 
-    body?: any
+    body?: B
   ): Promise<T> {
     const options: RequestInit = {
       method,

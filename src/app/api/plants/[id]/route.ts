@@ -8,11 +8,9 @@ import {
   harvestPlant
 } from '@/lib/db/plants';
 
-interface RouteParams {
-  params: {
-    id: string;
-  };
-}
+type RouteParams = {
+  params: { id: string };
+};
 
 /**
  * GET /api/plants/[id] - Get a specific plant

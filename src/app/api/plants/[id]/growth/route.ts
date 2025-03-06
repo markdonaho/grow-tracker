@@ -2,11 +2,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { addGrowthMetric, getPlantById } from '@/lib/db/plants';
 
-interface RouteParams {
-  params: {
-    id: string;
-  };
-}
+type RouteParams = {
+  params: { id: string };
+};
 
 /**
  * GET /api/plants/[id]/growth - Get growth metrics for a plant

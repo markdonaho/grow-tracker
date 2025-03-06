@@ -1,4 +1,3 @@
-// src/app/api/actions/[id]/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { 
   getActionById, 
@@ -8,10 +7,9 @@ import {
   removeImageFromAction
 } from '@/lib/db/actions';
 
-interface RouteParams {
-  params: {
-    id: string;
-  };
+// Fix the type definition for route parameters
+interface Params {
+  id: string;
 }
 
 /**
@@ -19,7 +17,7 @@ interface RouteParams {
  */
 export async function GET(
   request: NextRequest, 
-  { params }: RouteParams
+  { params }: { params: Params }
 ) {
   try {
     const { id } = params;
@@ -47,7 +45,7 @@ export async function GET(
  */
 export async function PATCH(
   request: NextRequest, 
-  { params }: RouteParams
+  { params }: { params: Params }
 ) {
   try {
     const { id } = params;
@@ -82,7 +80,7 @@ export async function PATCH(
  */
 export async function DELETE(
   request: NextRequest, 
-  { params }: RouteParams
+  { params }: { params: Params }
 ) {
   try {
     const { id } = params;
