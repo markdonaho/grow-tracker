@@ -1,20 +1,15 @@
-// src/app/api/images/[id]/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { getImageMetadataById, getImageUrl, deleteImage } from '@/lib/db/images';
-
-type RouteParams = {
-  params: { id: string };
-};
 
 /**
  * GET /api/images/[id] - Get image metadata and URL
  */
 export async function GET(
-  request: NextRequest, 
-  { params }: RouteParams
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const imageMetadata = await getImageMetadataById(id);
     
     if (!imageMetadata) {
@@ -45,11 +40,11 @@ export async function GET(
  * DELETE /api/images/[id] - Delete an image
  */
 export async function DELETE(
-  request: NextRequest, 
-  { params }: RouteParams
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const result = await deleteImage(id);
     
     if (!result) {

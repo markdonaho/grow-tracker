@@ -68,6 +68,25 @@ services:
     networks:
       - growtracker-network
 
+  # Next.js Application
+  growtracker:
+    build: .
+    ports:
+      - "3001:3000"
+    environment:
+      - MONGODB_URI=mongodb://admin:password@mongodb:27017/growtracker
+      - S3_ENDPOINT=http://minio:9000
+      - S3_REGION=us-east-1
+      - S3_ACCESS_KEY=minioadmin
+      - S3_SECRET_KEY=minioadmin
+      - S3_BUCKET=growtracker
+      - NODE_ENV=production
+    depends_on:
+      - mongodb
+      - minio
+    networks:
+      - growtracker-network
+
 volumes:
   mongodb-data:
   minio-data:

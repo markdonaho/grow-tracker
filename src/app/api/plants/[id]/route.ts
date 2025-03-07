@@ -1,4 +1,3 @@
-// src/app/api/plants/[id]/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { 
   getPlantById, 
@@ -6,19 +5,15 @@ import {
   deletePlant
 } from '@/lib/db/plants';
 
-type RouteParams = {
-  params: { id: string };
-};
-
 /**
  * GET /api/plants/[id] - Get a specific plant
  */
 export async function GET(
-  request: NextRequest, 
-  { params }: RouteParams
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const plant = await getPlantById(id);
     
     if (!plant) {
@@ -42,11 +37,11 @@ export async function GET(
  * PATCH /api/plants/[id] - Update a plant
  */
 export async function PATCH(
-  request: NextRequest, 
-  { params }: RouteParams
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
     
     // Convert dates from strings if necessary
@@ -81,11 +76,11 @@ export async function PATCH(
  * DELETE /api/plants/[id] - Delete a plant
  */
 export async function DELETE(
-  request: NextRequest, 
-  { params }: RouteParams
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const result = await deletePlant(id);
     
     if (!result) {

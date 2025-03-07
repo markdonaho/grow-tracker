@@ -1,20 +1,15 @@
-// src/app/api/plants/[id]/growth/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { addGrowthMetric, getPlantById } from '@/lib/db/plants';
-
-type RouteParams = {
-  params: { id: string };
-};
 
 /**
  * GET /api/plants/[id]/growth - Get growth metrics for a plant
  */
 export async function GET(
   request: NextRequest,
-  { params }: RouteParams
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const plant = await getPlantById(id);
     
     if (!plant) {
@@ -40,10 +35,10 @@ export async function GET(
  */
 export async function POST(
   request: NextRequest,
-  { params }: RouteParams
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
     
     // Validate the metric data
