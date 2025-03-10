@@ -1,5 +1,11 @@
 # Stage 1: Dependencies
-FROM --platform=linux/amd64 node:18-alpine AS deps
+FROM node:18-alpine AS deps
+
+# Add these lines to your existing Dockerfile
+LABEL org.opencontainers.image.source="https://github.com/markdonaho/grow-tracker.git"
+LABEL org.opencontainers.image.description="GrowTracker: Containerized Cultivation Management System"
+LABEL org.opencontainers.image.licenses="MIT"
+
 WORKDIR /app
 
 # Copy package files
@@ -9,7 +15,7 @@ COPY package.json package-lock.json ./
 RUN npm ci
 
 # Stage 2: Builder
-FROM --platform=linux/amd64 node:18-alpine AS builder
+FROM node:18-alpine AS builder
 WORKDIR /app
 
 # Copy dependencies from deps stage
@@ -19,14 +25,11 @@ COPY . .
 # Set environment variables
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Install platform-specific dependencies
-RUN npm install @tailwindcss/oxide-linux-x64-musl
-
 # Build the application
 RUN npm run build
 
 # Stage 3: Runner
-FROM --platform=linux/amd64 node:18-alpine AS runner
+FROM node:18-alpine AS runner
 WORKDIR /app
 
 # Set environment variables
@@ -35,7 +38,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 
 # Create a non-root user
 RUN addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 nextjs
+ adduser --system --uid 1001 nextjs
 
 # Copy necessary files
 COPY --from=builder /app/public ./public

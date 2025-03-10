@@ -11,6 +11,7 @@ async function apiCall<T = unknown, B = Record<string, unknown>>(
     method: string, 
     body?: B
   ): Promise<T> {
+    try{
     const options: RequestInit = {
       method,
       headers: {
@@ -30,7 +31,11 @@ async function apiCall<T = unknown, B = Record<string, unknown>>(
     }
   
     return response.json();
-  }
+  } catch (error) {
+    console.error(`API error (${method} ${url}):`, error);
+    throw error; // Re-throw so components can handle it
+  }}
+
   
   /**
    * Upload a file with multipart form data
