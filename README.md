@@ -648,3 +648,94 @@ After completing the UI integration, the next phase (Phase 3) will focus on cont
    - Use SWR's built-in error states for debugging
    - Try development mode with `USE_LOCAL_STORAGE=true` for simplified testing
 ```
+
+
+
+
+# Grow Tracker
+
+A [brief description of your application - e.g., "web application for tracking plant growth using Next.js, MongoDB, and MinIO for storage"].
+
+## Table of Contents
+
+1.  [Overview](#overview)
+2.  [Prerequisites](#prerequisites)
+3.  [Local Development](#local-development)
+4.  [Containerization](#containerization)
+    *   [Dockerfile](#dockerfile)
+    *   [Docker Compose](#docker-compose)
+5.  [CI/CD with GitHub Actions](#ci/cd-with-github-actions)
+6.  [Deployment](#deployment)
+    *   [Kubernetes (Optional)](#kubernetes-optional)
+7.  [Environment Variables](#environment-variables)
+8.  [Contributing](#contributing)
+9.  [License](#license)
+
+## Overview
+
+[Expand on the description of your application. Explain its purpose, main features, and technologies used.]
+
+This application is built using:
+
+*   [Next.js](https://nextjs.org/): [Briefly describe its role]
+*   [MongoDB](https://www.mongodb.com/): [Briefly describe its role]
+*   [MinIO](https://min.io/): [Briefly describe its role]
+
+## Prerequisites
+
+Before you begin, ensure you have the following installed:
+
+*   [Node.js](https://nodejs.org/) (version 18 or higher)
+*   [npm](https://www.npmjs.com/) or [Yarn](https://yarnpkg.com/)
+*   [Docker](https://www.docker.com/)
+*   [Docker Compose](https://docs.docker.com/compose/)
+*   [GitHub Account](https://github.com/)
+
+## Local Development
+
+1.  Clone the repository:
+
+    ```
+    git clone [your-repository-url]
+    cd grow-tracker
+    ```
+
+2.  Install dependencies:
+
+    ```
+    npm install
+    # or
+    yarn install
+    ```
+
+3.  Configure environment variables:
+
+    *   Create a `.env.local` file based on the `.env.example` file.
+    *   Fill in the required values (MongoDB URI, MinIO credentials, etc.).
+
+4.  Run the development server:
+
+    ```
+    npm run dev
+    # or
+    yarn dev
+    ```
+
+    Open your browser and navigate to `http://localhost:3000`.
+
+## Containerization
+
+This project is containerized using Docker for consistent development, deployment, and scaling.
+
+### Dockerfile
+
+The `Dockerfile` is located at the root of the project. It uses a multi-stage build process:
+
+1.  **Development Stage:**  For local development with hot-reloading.
+2.  **Build Stage:** Builds the Next.js application for production.
+3.  **Production Stage:** Creates a minimal image to serve the built application.
+
+[Include a snippet of your Dockerfile here - the one we've been working on.  This helps with discoverability and understanding.]
+
+To build the production image:
+
