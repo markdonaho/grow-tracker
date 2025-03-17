@@ -40,15 +40,13 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
       
-      - name: Setup Git
-        run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
-      
   update-gitops:
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
       - name: Get short SHA
         id: sha
         run: echo "short_sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
@@ -69,6 +67,8 @@ jobs:
       - name: Commit and push changes
         run: |
           cd k8s-gitops
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
           git add .
           git commit -m "Update GrowTracker image to ${{ steps.sha.outputs.short_sha }}" || echo "No changes to commit"
           git push
