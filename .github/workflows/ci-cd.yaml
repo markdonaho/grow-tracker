@@ -1,5 +1,9 @@
 name: CI/CD Pipeline
 
+permissions:
+  contents: read
+  packages: write
+
 on:
   push:
     branches: [main]  # Change to match your main branch name
@@ -43,6 +47,8 @@ jobs:
   update-gitops:
     needs: build-and-push
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -54,8 +60,8 @@ jobs:
       - name: Checkout GitOps repository
         uses: actions/checkout@v3
         with:
-          repository: markdonaho/k8s-gitops  # Update with your GitOps repo name
-          token: ${{ secrets.GITOPS_PAT }}   # You'll need to create this secret
+          repository: markdonaho/k8s-gitops  
+          token: ${{ secrets.GITOPS_PAT }}   
           path: k8s-gitops
           
       - name: Update Kubernetes manifests
