@@ -6,7 +6,7 @@ permissions:
 
 on:
   push:
-    branches: [main]  # Change to match your main branch name
+    branches: [main]
     paths-ignore:
       - '**.md'
       - '.github/**'
